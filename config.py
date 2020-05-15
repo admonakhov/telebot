@@ -1,5 +1,5 @@
 # Your telegram token from BotFather (str)
-TELEGRAM_TOKEN = ':AAHbNQpTt1Cu2hQMBzN3B88JH8j5VgYX4rA'
+TELEGRAM_TOKEN = ''
 # openweathermap appid (str)
 WEATHER_APPID = ''
 # owner's chatID (int):
