@@ -35,6 +35,6 @@ def regression(x, y):
     cor['cov'] /= (len(x) - 1)
     cor['regression'] = cor['cov'] / (s_y * s_x)
     cor['slope'] = (s_y / s_x) * (cor['regression'])
-    cor['intercept'] = m_y + np.abs(cor['slope'] * m_x)
+    cor['intercept'] = m_y + (cor['slope'] * m_x)
 
     return cor
