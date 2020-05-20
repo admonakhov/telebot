@@ -8,6 +8,8 @@ import mymath
 bot = telebot.TeleBot(config.TELEGRAM_TOKEN)
 bot.send_message(config.OWNER, 'I\'m alive!!!')
 
+user = config.deafault_user
+
 
 def log(message, text=''):
     with open('visitors.txt', 'a') as visit:
@@ -58,8 +60,7 @@ def who(message):
                 bot.send_message(config.OWNER, line)
     else:
         bot.send_message(config.OWNER, message.from_user.first_name + ' ' \
-                         + message.from_user.last_name + ' ' + 'tr'
-                                                               'y to command')
+                         + message.from_user.last_name + ' ' + 'try to command')
         bot.send_message(message.chat.id, "You have not permission, you will reported")
         log(message)
 
@@ -92,8 +93,13 @@ def help(message):
 
 @bot.message_handler(commands=['commands'])
 def cmd(msg):
-    bot.send_message(msg.chat.id, "/median - медиана \n/mean - среднее \n/sko - СКО \n/cv - коэффициент вариации "
-                                  "\n/sum - сумма\n/plot - для построения графика")
+    bot.send_message(msg.chat.id, "/median - медиана \n"
+                                  "/mean - среднее \n"
+                                  "/sko - СКО \n"
+                                  "/cv - коэффициент вариации\n"
+                                  "/sum - сумма\n"
+                                  "/plot - для построения графика\n"
+                                  "/sn - для построения кривой усталости")
 
 
 @bot.message_handler(commands=['plot'])
@@ -103,7 +109,8 @@ def plot(msg):
     helboard.add(helpbutton)
     text = msg.text
     if len(re.findall(r'\s*\d+\s*:\s*\d+\s*', text)) == 0:
-        send_mess = 'Чтобы воспользоваться коммандой /plot укажите после нее набор чисел'
+        send_mess = 'Чтобы воспользоваться коммандой /plot укажите через пробел пары чисел в формате Yi:Xi' \
+                    ' пример приложе в клавиатуре'
         bot.send_message(msg.chat.id, send_mess, reply_markup=helboard)
     else:
         patY = r'\s*(\d+)\s*:'
@@ -111,13 +118,43 @@ def plot(msg):
         try:
             Y = list(map(float, re.findall(patY, text)))
             X = list(map(float, re.findall(patX, text)))
-            myplot.plot(X, Y)
+            myplot.plot(X, Y, user)
             img = open('tmp.png', 'rb')
             bot.send_photo(msg.chat.id, img)
             img.close()
         except:
             bot.send_message(msg.chat.id, "Что-то не так! Провертье формат записи Y:X", reply_markup=helboard)
 
+
+@bot.message_handler(commands=['sn'])
+def sn(msg):
+    helboard = telebot.types.ReplyKeyboardMarkup(True, True)
+    helpbutton = telebot.types.KeyboardButton('/sn 300:85000 300:90000 400:26000 400:23000 450:14500 450:15630')
+    helboard.add(helpbutton)
+    text = msg.text
+
+    if len(re.findall(r'\s*\d+\s*:\s*\d+\s*', text)) == 0:
+        send_mess = 'Для построения кривой усталости, воспульзуйтесь командой /sn, затем через пробел укажите пары Напряжение:Долговечность, пример приложен в клавиатуре'
+        bot.send_message(msg.chat.id, send_mess, reply_markup=helboard)
+    else:
+        patY = r'\s*(\d+)\s*:'
+        patX = r':\s*(\d+)\s*'
+        try:
+            Y = list(map(float, re.findall(patY, text)))
+            X = list(map(float, re.findall(patX, text)))
+            myplot.sn(X, Y)
+            img = open('tmp.png', 'rb')
+            bot.send_photo(msg.chat.id, img)
+            img.close()
+        except Exception as e:
+            bot.send_message(msg.chat.id, "Что-то не так! Провертье формат записи Напряжение:Долговечность", reply_markup=helboard)
+            log(msg, e)
+
+@bot.message_handler(commands=['plotconfig'])
+def plotconfig(msg):
+    pattern = r'(?:plotconfig )(\w*) (\w*)'
+    cmd, atr = re.findall(pattern, msg.text)[0]
+    print(cmd, atr)
 
 @bot.message_handler(content_types=['text'])
 def any_text(msg):
