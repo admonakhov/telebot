@@ -13,7 +13,7 @@ def plot(X, Y, usr=config.deafault_user):
     if usr['regr']:
         cor = mymath.regression(X, Y)
         x = sorted(set(X))
-        y_regr = list(map(lambda x: x * cor['slope'] + cor['intercept'], x))
+        y_regr = list(map(lambda x:cor['intercept'] + x * cor['slope'], x))
         plt.plot(x, y_regr, usr['color'])
     plt.savefig('tmp.png')
     plt.close()
